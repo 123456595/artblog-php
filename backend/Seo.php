@@ -187,17 +187,35 @@ final class Seo
             return ['js' => null, 'css' => []];
         }
         $key = 'src/' . $entry . '/main.tsx';
-        $data = $manifest[$key] ?? null;
-        if (!is_array($data)) {
+        if (!isset($manifest[$key]['file'])) {
             return ['js' => null, 'css' => []];
         }
+
+        // Vite 会把公共样式（tokens/base/article）抽到共享 chunk，
+        // 必须沿 imports 递归收集，否则入口 CSS 里的 var() 全部失效。
         $css = [];
-        foreach ((array) ($data['css'] ?? []) as $file) {
-            $css[] = '/assets/' . $file;
-        }
+        $seen = [];
+        $walk = static function (string $k) use (&$walk, &$seen, &$css, $manifest): void {
+            if (isset($seen[$k])) {
+                return;
+            }
+            $seen[$k] = true;
+            $item = $manifest[$k] ?? null;
+            if (!is_array($item)) {
+                return;
+            }
+            foreach ((array) ($item['imports'] ?? []) as $dep) {
+                $walk((string) $dep);
+            }
+            foreach ((array) ($item['css'] ?? []) as $file) {
+                $css[] = '/assets/' . $file;
+            }
+        };
+        $walk($key);
+
         return [
-            'js' => isset($data['file']) ? '/assets/' . $data['file'] : null,
-            'css' => $css,
+            'js' => '/assets/' . $manifest[$key]['file'],
+            'css' => array_values(array_unique($css)),
         ];
     }
 }

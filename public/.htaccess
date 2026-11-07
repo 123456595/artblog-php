@@ -1,17 +1,18 @@
-# ArtBlog · Apache 重写规则
-RewriteEngine On
+# Apache 路由规则（需启用 mod_rewrite 与 AllowOverride All）
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
 
-# API 入口
-RewriteRule ^api(/.*)?$ api.php [L,QSA]
+    # 已存在的文件/目录直接返回
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
 
-# Feed 入口
-RewriteRule ^sitemap\.xml$ sitemap.php [L]
-RewriteRule ^rss\.xml$ rss.php [L]
+    # 独立入口
+    RewriteRule ^api(/.*)?$ api.php [L,QSA]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+    RewriteRule ^rss\.xml$ rss.php [L]
 
-# 静态文件透传（assets / uploads）
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# 其余全部交给 SPA 外壳（含 robots.txt）
-RewriteRule ^ index.php [L,QSA]
+    # SPA / 页面路由回退
+    RewriteRule ^ index.php [L,QSA]
+</IfModule>
