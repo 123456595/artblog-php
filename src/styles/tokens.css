@@ -1,0 +1,32 @@
+:root {
+  --paper: #fbfbf8;
+  --paper-2: #f1f1ec;
+  --paper-3: #ffffff;
+  --ink: #0b0b0b;
+  --ink-soft: #1e1e1b;
+  --muted: #6e6e66;
+  --muted-2: #9b9b92;
+  --line: #d8d8d0;
+  --line-soft: #e7e7df;
+  --accent: #2f5bff;
+  --accent-soft: #eef0ff;
+  --ok: #1c7c4a;
+
+  --radius: 2px;
+  --radius-md: 8px;
+
+  --nav-h: 56px;
+  --gutter: clamp(16px, 4vw, 44px);
+  --maxw: 1320px;
+  --section-gap: clamp(56px, 8vw, 104px);
+
+  --font-display: 'Archivo Variable', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    sans-serif;
+  --font-sans: 'IBM Plex Sans Variable', -apple-system, BlinkMacSystemFont, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', 'Cascadia Code', 'Consolas',
+    monospace;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --shadow-tile: 0 22px 40px -18px rgba(11, 11, 11, 0.45), 0 2px 0 rgba(11, 11, 11, 0.06);
+}

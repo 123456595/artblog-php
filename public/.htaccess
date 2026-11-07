@@ -1,0 +1,17 @@
+# ArtBlog · Apache 重写规则
+RewriteEngine On
+
+# API 入口
+RewriteRule ^api(/.*)?$ api.php [L,QSA]
+
+# Feed 入口
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+RewriteRule ^rss\.xml$ rss.php [L]
+
+# 静态文件透传（assets / uploads）
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# 其余全部交给 SPA 外壳（含 robots.txt）
+RewriteRule ^ index.php [L,QSA]

@@ -1,0 +1,14 @@
+node_modules/
+public/assets/
+storage/*.sqlite
+storage/*.sqlite-journal
+storage/*.sqlite-shm
+storage/*.sqlite-wal
+storage/sessions/
+public/uploads/*
+!public/uploads/.gitkeep
+!public/uploads/seed/
+!public/uploads/seed/*
+.env
+*.log
+.DS_Store
