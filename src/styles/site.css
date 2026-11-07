@@ -1607,3 +1607,135 @@
   color: var(--muted);
 }
 
+/* ---------- 滚动标题：字母竖直散开 → 逐个归位 ---------- */
+.sec-title--motion {
+  perspective: 900px;
+}
+.st-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  line-height: 1;
+}
+.st-char {
+  display: inline-block;
+  transform-origin: 50% 62%;
+  will-change: transform, opacity;
+  transform: translate3d(
+      calc(var(--dx, 0px) * (1 - var(--lp, 0))),
+      calc(var(--dy, 0px) * (1 - var(--lp, 0))),
+      0
+    )
+    rotate(calc(var(--rot, 0deg) * (1 - var(--lp, 0))));
+  opacity: calc(0.35 + 0.65 * var(--lp, 0));
+}
+.st-dot {
+  color: var(--accent);
+}
+.st-cn {
+  display: inline-block;
+}
+
+/* ---------- 蓝图刻度尺（右侧滚动仪表） ---------- */
+.rail {
+  position: fixed;
+  right: 14px;
+  top: calc(var(--nav-h) + 26px);
+  bottom: 54px;
+  width: 54px;
+  z-index: 26;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+  font-family: var(--font-mono);
+  color: var(--muted);
+}
+.rail-pct {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+.rail-pct b {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+}
+.rail-pct span {
+  font-size: 9px;
+  color: var(--muted-2);
+}
+.rail-track {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+.rail-axis {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 1px;
+  background: var(--line);
+}
+.rail-ticks {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--muted-2) 0,
+    var(--muted-2) 1px,
+    transparent 1px,
+    transparent 12px
+  );
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
+  opacity: 0.55;
+}
+.rail-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1px;
+  height: 0;
+  background: var(--accent);
+  transition: height 0.08s linear;
+}
+.rail-marker {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  transform: translateY(-50%) rotate(45deg);
+}
+.rail-sec {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: var(--muted-2);
+  writing-mode: vertical-rl;
+  text-transform: uppercase;
+}
+.rail-sec b {
+  color: var(--ink);
+  font-weight: 500;
+}
+.rail-sec i {
+  font-style: normal;
+}
+
+@media (max-width: 900px) {
+  .rail {
+    display: none;
+  }
+}
+

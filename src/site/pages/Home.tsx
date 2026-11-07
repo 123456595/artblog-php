@@ -6,6 +6,8 @@ import { useSite } from '../siteData';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Hero from '../components/Hero';
+import ScrollRail from '../components/ScrollRail';
+import ScrollTitle from '../components/ScrollTitle';
 import { Empty, Loading, SectionHead } from '../components/ui';
 import {
   GalleryGrid,
@@ -52,6 +54,7 @@ export default function Home({ onSearch }: { onSearch: () => void }) {
   return (
     <div className="page">
       <Header onSearch={onSearch} />
+      <ScrollRail />
       <Hero tiles={tiles} />
 
       <div className="shell">
@@ -66,11 +69,7 @@ export default function Home({ onSearch }: { onSearch: () => void }) {
               </>
             }
           />
-          <div className="sec-title">
-            Notes in progress<span className="accent">.</span>
-            <br />
-            <span className="cn">把没想明白的，写下来。</span>
-          </div>
+          <ScrollTitle text="Notes in progress." cn="把没想明白的，写下来。" />
 
           {postsRes.error && <Empty text="文章加载失败 / FAILED TO LOAD" />}
           {!postsRes.data && !postsRes.error && <Loading />}
@@ -124,11 +123,7 @@ export default function Home({ onSearch }: { onSearch: () => void }) {
               </>
             }
           />
-          <div className="sec-title">
-            Things I built<span className="accent">.</span>
-            <br />
-            <span className="cn">做出来，比想出来重要。</span>
-          </div>
+          <ScrollTitle text="Things I built." cn="做出来，比想出来重要。" />
           {worksRes.error && <Empty text="作品加载失败 / FAILED TO LOAD" />}
           {!worksRes.data && !worksRes.error && <Loading />}
           {works.length > 0 && <WorksGrid works={works} />}
@@ -192,11 +187,7 @@ export default function Home({ onSearch }: { onSearch: () => void }) {
               </>
             }
           />
-          <div className="sec-title">
-            Fragments<span className="accent">.</span>
-            <br />
-            <span className="cn">一些没有写进文章的碎片。</span>
-          </div>
+          <ScrollTitle text="Fragments." cn="一些没有写进文章的碎片。" />
           {galleryRes.error && <Empty text="图片加载失败 / FAILED TO LOAD" />}
           {!galleryRes.data && !galleryRes.error && <Loading />}
           {gallery.length > 0 && <GalleryGrid items={gallery} onOpen={setLightbox} />}

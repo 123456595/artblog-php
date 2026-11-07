@@ -1,7 +1,6 @@
-# Nginx 路由规则（由 phpStudy vhost 的 include 引入到 location / 内）
-# 生效范围：静态资源直出 + API/Feed 独立入口 + SPA 路由回退
+# Nginx rules (included into location / by phpStudy vhost)
+# Static assets served directly, API/feed entries, SPA fallback.
 
-# 静态资源：存在则直出，缺失就 404，禁止回退成 HTML
 location ^~ /assets/ {
     try_files $uri =404;
     expires 30d;
@@ -14,7 +13,7 @@ location ^~ /uploads/ {
     access_log off;
 }
 
-# 独立入口
+# Standalone entries
 location = /sitemap.xml {
     rewrite ^ /sitemap.php last;
 }
@@ -31,5 +30,5 @@ location ^~ /api/ {
     rewrite ^/api/(.*)$ /api.php last;
 }
 
-# SPA / 页面路由回退到 front controller
+# Page routes fall back to front controller
 try_files $uri $uri/ /index.php?$query_string;
