@@ -34,7 +34,18 @@ function env_load(string $file): void
         $value = trim(substr($line, $pos + 1));
         $value = trim($value, "\"'");
         $_ENV[$key] = $value;
-        putenv($key . '=' . $value);
+        /* 不少虚拟主机在 disable_functions 里禁用 putenv；写进 $_ENV 即可正常读取 */
+        if (function_exists('putenv')) {
+            @putenv($key . '=' . $value);
+        }
+    }
+}
+
+/** 兼容 disable_functions 环境：被禁用时静默跳过 */
+function ini_set_safe(string $key, string $value): void
+{
+    if (function_exists('ini_set')) {
+        @ini_set($key, $value);
     }
 }
 
@@ -61,10 +72,10 @@ date_default_timezone_set(APP_TIMEZONE);
 
 if (APP_ENV === 'local') {
     error_reporting(E_ALL);
-    ini_set('display_errors', '1');
+    ini_set_safe('display_errors', '1');
 } else {
     error_reporting(0);
-    ini_set('display_errors', '0');
+    ini_set_safe('display_errors', '0');
 }
 
 /* ---------- 会话目录（不依赖系统临时目录权限） ---------- */
@@ -73,7 +84,7 @@ if (!is_dir($sessionDir)) {
     @mkdir($sessionDir, 0775, true);
 }
 if (is_writable($sessionDir)) {
-    ini_set('session.save_path', $sessionDir);
+    ini_set_safe('session.save_path', $sessionDir);
 }
 
 /* ---------- 自动加载 ---------- */

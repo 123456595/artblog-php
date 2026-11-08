@@ -101,19 +101,22 @@ final class Upload
         if (!extension_loaded('gd') || $ext === 'gif') {
             return null;
         }
-        $img = null;
-        switch ($ext) {
-            case 'jpg':
-            case 'jpeg':
-                $img = @imagecreatefromjpeg($src);
-                break;
-            case 'png':
-                $img = @imagecreatefrompng($src);
-                break;
-            case 'webp':
-                $img = @imagecreatefromwebp($src);
-                break;
+        // 部分主机的 GD 未编译 WebP 支持，缺少函数时直接跳过缩略图
+        $reader = [
+            'jpg' => 'imagecreatefromjpeg',
+            'jpeg' => 'imagecreatefromjpeg',
+            'png' => 'imagecreatefrompng',
+            'webp' => 'imagecreatefromwebp',
+        ][$ext] ?? null;
+        if (
+            $reader === null
+            || !function_exists($reader)
+            || !function_exists('imagecreatetruecolor')
+            || !function_exists('imagewebp')
+        ) {
+            return null;
         }
+        $img = @$reader($src);
         if (!$img) {
             return null;
         }
