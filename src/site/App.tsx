@@ -34,6 +34,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <SiteProvider>
+        <a className="skip-link" href="#main">
+          跳到正文 / SKIP TO CONTENT
+        </a>
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home onSearch={openSearch} />} />

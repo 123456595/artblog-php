@@ -52,7 +52,7 @@ export default function Home({ onSearch }: { onSearch: () => void }) {
   const tiles = works.map((w) => w.cover).filter((c): c is string => Boolean(c));
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <ScrollRail />
       <Hero tiles={tiles} />

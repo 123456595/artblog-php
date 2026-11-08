@@ -24,7 +24,7 @@ export default function PostPage({ onSearch }: { onSearch: () => void }) {
 
   if (error) {
     return (
-      <div className="page">
+      <div className="page" id="main" tabIndex={-1}>
         <Header onSearch={onSearch} />
         <div className="shell">
           <div className="page-state">
@@ -41,7 +41,7 @@ export default function PostPage({ onSearch }: { onSearch: () => void }) {
 
   if (!post) {
     return (
-      <div className="page">
+      <div className="page" id="main" tabIndex={-1}>
         <Header onSearch={onSearch} />
         <Loading label="正在读取文章 / LOADING ENTRY" />
         <Footer />
@@ -63,7 +63,7 @@ export default function PostPage({ onSearch }: { onSearch: () => void }) {
   };
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="read-progress" aria-hidden="true">
         <i style={{ ['--p' as string]: progress }} />

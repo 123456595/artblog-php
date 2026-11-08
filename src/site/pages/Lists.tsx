@@ -25,7 +25,7 @@ export function WritingPage({ onSearch }: { onSearch: () => void }) {
   };
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <PageHead
@@ -108,7 +108,7 @@ export function ArchivePage({ onSearch }: { onSearch: () => void }) {
     })) ?? [];
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <PageHead
@@ -183,7 +183,7 @@ export function TagsPage({ onSearch }: { onSearch: () => void }) {
   useDocumentMeta(`标签 — ${site?.meta.name ?? 'CodeKpy'}`, '按标签浏览文章。');
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <PageHead
@@ -229,7 +229,7 @@ export function TagPage({ onSearch }: { onSearch: () => void }) {
   useDocumentMeta(`#${tag?.name ?? slug} — ${site?.meta.name ?? 'CodeKpy'}`);
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <PageHead eyebrow="03 / TAG" title={`#${tag?.name ?? slug}`} cn="标签下的文章。"
@@ -264,7 +264,7 @@ export function AboutPage({ onSearch }: { onSearch: () => void }) {
   const meta = site?.meta;
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <PageHead

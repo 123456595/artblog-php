@@ -43,6 +43,9 @@ export default function Layout() {
 
   return (
     <div className="admin-shell">
+      <a className="skip-link" href="#admin-main">
+        跳到内容 / SKIP TO CONTENT
+      </a>
       <aside className={`admin-side ${open ? 'open' : ''}`}>
         <div className="admin-brand">
           <span className="admin-brand-mark">K</span>
@@ -99,7 +102,7 @@ export default function Layout() {
             </a>
           </div>
         </header>
-        <main className="admin-content">
+        <main className="admin-content" id="admin-main" tabIndex={-1}>
           <Outlet />
         </main>
         <footer className="admin-foot">

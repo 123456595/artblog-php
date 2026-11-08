@@ -127,8 +127,15 @@ button {
   transform: translateY(-200%);
   transition: transform 0.2s var(--ease);
 }
-.skip-link:focus {
+.skip-link:focus,
+.skip-link:focus-visible {
   transform: none;
+}
+
+/* 锚点跳转后的整页焦点不要出现轮廓 */
+.page:focus,
+.page:focus-visible {
+  outline: none;
 }
 
 /* ---------- 按钮 ---------- */

@@ -14,7 +14,7 @@ export function WorksPage({ onSearch }: { onSearch: () => void }) {
   useDocumentMeta(`作品 — ${site?.meta.name ?? 'CodeKpy'}`, '项目、实验和做出来的东西。');
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <PageHead
@@ -73,7 +73,7 @@ export function WorkPage({ onSearch }: { onSearch: () => void }) {
   );
 
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         {error && (
@@ -164,7 +164,7 @@ export function NotFoundPage({ onSearch }: { onSearch: () => void }) {
   const { site } = useSite();
   useDocumentMeta(`404 — ${site?.meta.name ?? 'CodeKpy'}`);
   return (
-    <div className="page">
+    <div className="page" id="main" tabIndex={-1}>
       <Header onSearch={onSearch} />
       <div className="shell">
         <div className="not-found">

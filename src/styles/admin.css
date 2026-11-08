@@ -154,6 +154,10 @@
   flex: 1;
   padding: 28px;
 }
+.admin-content:focus,
+.admin-content:focus-visible {
+  outline: none;
+}
 
 .admin-foot {
   border-top: 1px solid var(--line);
