@@ -1619,7 +1619,6 @@
 .st-char {
   display: inline-block;
   transform-origin: 50% 62%;
-  will-change: transform, opacity;
   transform: translate3d(
       calc(var(--dx, 0px) * (1 - var(--lp, 0))),
       calc(var(--dy, 0px) * (1 - var(--lp, 0))),
@@ -1704,7 +1703,6 @@
   width: 1px;
   height: 0;
   background: var(--accent);
-  transition: height 0.08s linear;
 }
 .rail-marker {
   position: absolute;

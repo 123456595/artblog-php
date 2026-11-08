@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '../../shared/api';
 import type { MediaItem } from '../types';
-import { Empty, Icon, Loading, Modal } from './ui';
+import { Empty, Icon, Loading, Modal, Notice } from './ui';
 
-/** 媒体库选择弹窗：返回所选图片的 path */
+/** 媒体库选择弹窗：返回所选图片的 path，也支持直接上传 */
 export default function MediaPicker({
   onSelect,
   onClose,
@@ -13,13 +13,41 @@ export default function MediaPicker({
 }) {
   const [items, setItems] = useState<MediaItem[] | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     api
       .get<{ items: MediaItem[] }>('/admin/media')
       .then((res) => setItems(res.items))
-      .catch(() => setItems([]));
+      .catch(() => {
+        setItems([]);
+        setError('媒体库加载失败');
+      });
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const onFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setError('');
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const res = await api.upload<{ path: string }>(file);
+        setSelected(res.path);
+      }
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '上传失败');
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
 
   return (
     <Modal
@@ -28,6 +56,23 @@ export default function MediaPicker({
       large
       footer={
         <>
+          <button
+            className="btn btn-ghost btn-sm"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+          >
+            <Icon name="upload" size={12} />
+            {uploading ? '上传中…' : '上传新图片'}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            multiple
+            hidden
+            onChange={(e) => void onFiles(e.target.files)}
+          />
+          <div className="toolbar-spacer" />
           <button className="btn btn-ghost btn-sm" onClick={onClose}>
             取消
           </button>
@@ -41,10 +86,15 @@ export default function MediaPicker({
         </>
       }
     >
+      {error && (
+        <div style={{ marginBottom: 14 }}>
+          <Notice kind="err">{error}</Notice>
+        </div>
+      )}
       {items === null ? (
         <Loading />
       ) : items.length === 0 ? (
-        <Empty text="媒体库为空，请先到「媒体库」上传图片" />
+        <Empty text="媒体库为空，点左下角「上传新图片」" />
       ) : (
         <div className="media-grid">
           {items.map((m) => (

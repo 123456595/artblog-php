@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/backend/bootstrap.php';
+require_once dirname(__DIR__) . '/backend/bootstrap.php';
 
 Feed::sitemap();
