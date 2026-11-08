@@ -380,6 +380,91 @@ final class Content
         db()->prepare('DELETE FROM posts WHERE id = ?')->execute([$id]);
     }
 
+    /**
+     * 批量操作：publish / draft / featured / unfeatured / delete / tag-add / tag-remove
+     */
+    public static function batchPosts(array $body): array
+    {
+        $action = (string) ($body['action'] ?? '');
+        $ids = array_values(array_filter(
+            array_map('intval', (array) ($body['ids'] ?? [])),
+            static fn(int $v): bool => $v > 0
+        ));
+        $value = trim((string) ($body['value'] ?? ''));
+
+        if ($ids === []) {
+            Http::error(422, '请至少选择一篇文章');
+        }
+        $allowed = ['publish', 'draft', 'featured', 'unfeatured', 'delete', 'tag-add', 'tag-remove'];
+        if (!in_array($action, $allowed, true)) {
+            Http::error(422, '未知的批量操作');
+        }
+        if (in_array($action, ['tag-add', 'tag-remove'], true) && $value === '') {
+            Http::error(422, '请填写标签名');
+        }
+
+        $pdo = db();
+        $now = date('Y-m-d H:i:s');
+        $pdo->beginTransaction();
+        try {
+            foreach ($ids as $id) {
+                switch ($action) {
+                    case 'publish':
+                        $pdo->prepare(
+                            'UPDATE posts SET status = ?, published_at = COALESCE(published_at, ?), updated_at = ?
+                             WHERE id = ?'
+                        )->execute(['published', $now, $now, $id]);
+                        break;
+                    case 'draft':
+                        $pdo->prepare('UPDATE posts SET status = ?, updated_at = ? WHERE id = ?')
+                            ->execute(['draft', $now, $id]);
+                        break;
+                    case 'featured':
+                        $pdo->prepare('UPDATE posts SET featured = 1, updated_at = ? WHERE id = ?')
+                            ->execute([$now, $id]);
+                        break;
+                    case 'unfeatured':
+                        $pdo->prepare('UPDATE posts SET featured = 0, updated_at = ? WHERE id = ?')
+                            ->execute([$now, $id]);
+                        break;
+                    case 'delete':
+                        $pdo->prepare('DELETE FROM post_tags WHERE post_id = ?')->execute([$id]);
+                        $pdo->prepare('DELETE FROM posts WHERE id = ?')->execute([$id]);
+                        break;
+                    case 'tag-add':
+                    case 'tag-remove':
+                        $tags = self::postTagNames($id);
+                        $slug = Markdown::slugify($value);
+                        if ($action === 'tag-add') {
+                            $exists = false;
+                            foreach ($tags as $t) {
+                                if ($t['slug'] === $slug) {
+                                    $exists = true;
+                                }
+                            }
+                            if (!$exists) {
+                                $tags[] = ['slug' => $slug, 'name' => $value];
+                            }
+                        } else {
+                            $tags = array_values(array_filter(
+                                $tags,
+                                static fn(array $t): bool => $t['slug'] !== $slug
+                            ));
+                        }
+                        self::syncPostTags($id, $tags);
+                        $pdo->prepare('UPDATE posts SET updated_at = ? WHERE id = ?')->execute([$now, $id]);
+                        break;
+                }
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+
+        return ['ok' => true, 'count' => count($ids), 'action' => $action];
+    }
+
     /* ================================================================
      * 后台 · 作品 / 图墙 / Now / 工具箱
      * ============================================================== */
@@ -590,8 +675,7 @@ final class Content
     public static function saveSettings(array $kv): void
     {
         $stmt = db()->prepare(
-            'INSERT INTO settings (key, value) VALUES (?, ?)
-             ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+            'INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)'
         );
         foreach (self::SETTING_KEYS as $key) {
             if (array_key_exists($key, $kv)) {

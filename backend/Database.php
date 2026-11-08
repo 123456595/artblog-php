@@ -135,8 +135,10 @@ SQL);
 
     private static function seed(PDO $pdo): void
     {
-        $count = (int) $pdo->query('SELECT COUNT(*) FROM posts')->fetchColumn();
-        if ($count > 0) {
+        /* 以 settings 判定是否首次安装：
+           用户主动清空文章后不应再灌一遍种子数据 */
+        $installed = (int) $pdo->query('SELECT COUNT(*) FROM settings')->fetchColumn();
+        if ($installed > 0) {
             return;
         }
 
@@ -160,7 +162,7 @@ SQL);
             'footerNote' => '用蓝图的方式记录成长。',
             'newsletterNote' => '每月一封 · 不发广告 · 随时退订',
         ];
-        $stmt = $pdo->prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
+        $stmt = $pdo->prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)');
         foreach ($settings as $k => $v) {
             $stmt->execute([$k, $v]);
         }

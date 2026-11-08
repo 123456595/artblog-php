@@ -3,7 +3,16 @@ import { Link } from 'react-router-dom';
 import { api } from '../../shared/api';
 import { useAuthGuard } from '../auth';
 import type { AdminPostList, AdminPostRow } from '../types';
-import { ConfirmModal, Empty, formatDate, Icon, Loading, Notice } from '../components/ui';
+import {
+  ConfirmModal,
+  Empty,
+  Field,
+  formatDate,
+  Icon,
+  Loading,
+  Modal,
+  Notice,
+} from '../components/ui';
 
 export default function Posts() {
   const guard = useAuthGuard();
@@ -14,6 +23,13 @@ export default function Posts() {
   const [page, setPage] = useState(1);
   const [toDelete, setToDelete] = useState<AdminPostRow | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  /* 多选与批量操作 */
+  const [checked, setChecked] = useState<number[]>([]);
+  const [bulkBusy, setBulkBusy] = useState('');
+  const [confirmBulk, setConfirmBulk] = useState(false);
+  const [tagModal, setTagModal] = useState<'tag-add' | 'tag-remove' | null>(null);
+  const [tagValue, setTagValue] = useState('');
 
   const load = useCallback(() => {
     const params = new URLSearchParams();
@@ -32,6 +48,44 @@ export default function Posts() {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    setChecked([]);
+  }, [q, status, page]);
+
+  const allChecked =
+    data !== null && data.posts.length > 0 && data.posts.every((p) => checked.includes(p.id));
+
+  const toggleOne = (id: number) => {
+    setChecked((list) => (list.includes(id) ? list.filter((v) => v !== id) : [...list, id]));
+  };
+
+  const toggleAll = () => {
+    if (!data) return;
+    setChecked(allChecked ? [] : data.posts.map((p) => p.id));
+  };
+
+  const runBatch = async (action: string, value?: string) => {
+    if (checked.length === 0 || bulkBusy) return;
+    setBulkBusy(action);
+    setError('');
+    try {
+      await api.post('/admin/posts/batch', {
+        ids: checked,
+        action,
+        ...(value !== undefined ? { value } : {}),
+      });
+      setChecked([]);
+      load();
+    } catch (err) {
+      if (!guard(err)) setError(err instanceof Error ? err.message : '批量操作失败');
+    } finally {
+      setBulkBusy('');
+      setConfirmBulk(false);
+      setTagModal(null);
+      setTagValue('');
+    }
+  };
 
   const onDelete = async () => {
     if (!toDelete) return;
@@ -85,6 +139,66 @@ export default function Posts() {
         </div>
       </div>
 
+      {checked.length > 0 && (
+        <div className="bulk-bar">
+          <span className="bulk-count">已选 {checked.length} 篇</span>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => void runBatch('publish')}
+          >
+            发布
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => void runBatch('draft')}
+          >
+            转草稿
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => void runBatch('featured')}
+          >
+            设精选
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => void runBatch('unfeatured')}
+          >
+            取消精选
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => setTagModal('tag-add')}
+          >
+            加标签
+          </button>
+          <button
+            className="btn btn-ghost btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => setTagModal('tag-remove')}
+          >
+            移除标签
+          </button>
+          <button
+            className="btn btn-danger btn-sm"
+            disabled={Boolean(bulkBusy)}
+            onClick={() => setConfirmBulk(true)}
+          >
+            删除
+          </button>
+          <div className="toolbar-spacer" />
+          {bulkBusy && <span className="bulk-count">处理中…</span>}
+          <button className="btn btn-ghost btn-sm" onClick={() => setChecked([])}>
+            取消选择
+          </button>
+        </div>
+      )}
+
       <div className="panel-body flush">
         {error ? (
           <div className="panel-body">
@@ -98,6 +212,14 @@ export default function Posts() {
           <table className="tbl">
             <thead>
               <tr>
+                <th style={{ width: 40 }}>
+                  <input
+                    type="checkbox"
+                    aria-label="全选"
+                    checked={allChecked}
+                    onChange={toggleAll}
+                  />
+                </th>
                 <th>标题</th>
                 <th>状态</th>
                 <th>标签</th>
@@ -108,7 +230,15 @@ export default function Posts() {
             </thead>
             <tbody>
               {data.posts.map((p) => (
-                <tr key={p.id}>
+                <tr key={p.id} className={checked.includes(p.id) ? 'is-checked' : ''}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      aria-label={`选择 ${p.title}`}
+                      checked={checked.includes(p.id)}
+                      onChange={() => toggleOne(p.id)}
+                    />
+                  </td>
                   <td>
                     <Link to={`/posts/${p.id}`} className="cell-title">
                       {p.title}
@@ -198,6 +328,51 @@ export default function Posts() {
           onCancel={() => setToDelete(null)}
           onConfirm={onDelete}
         />
+      )}
+
+      {confirmBulk && (
+        <ConfirmModal
+          title="批量删除"
+          text={`确定删除选中的 ${checked.length} 篇文章吗？此操作不可恢复。`}
+          busy={Boolean(bulkBusy)}
+          onCancel={() => setConfirmBulk(false)}
+          onConfirm={() => void runBatch('delete')}
+        />
+      )}
+
+      {tagModal && (
+        <Modal
+          title={tagModal === 'tag-add' ? '批量添加标签' : '批量移除标签'}
+          onClose={() => setTagModal(null)}
+          footer={
+            <>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setTagModal(null)}
+                disabled={Boolean(bulkBusy)}
+              >
+                取消
+              </button>
+              <button
+                className="btn btn-primary btn-sm"
+                disabled={Boolean(bulkBusy) || tagValue.trim() === ''}
+                onClick={() => void runBatch(tagModal, tagValue.trim())}
+              >
+                {bulkBusy ? '处理中…' : `应用到 ${checked.length} 篇`}
+              </button>
+            </>
+          }
+        >
+          <Field label="标签名" hint="不存在的标签会自动创建">
+            <input
+              className="input"
+              autoFocus
+              value={tagValue}
+              onChange={(e) => setTagValue(e.target.value)}
+              placeholder="如 学习笔记"
+            />
+          </Field>
+        </Modal>
       )}
     </div>
   );

@@ -99,7 +99,11 @@ export default function Home({ onSearch }: { onSearch: () => void }) {
           {rows.length ? (
             <PostRows posts={rows} startIndex={2} />
           ) : (
-            <div className="list-empty">NO ENTRIES UNDER THIS FILTER / 该标签下暂无文章</div>
+            <div className="list-empty">
+              {filter
+                ? '该标签下暂无文章 / NO ENTRIES UNDER THIS TAG'
+                : '暂无文章 / NO ENTRIES YET'}
+            </div>
           )}
 
           <div className="sec-cta">

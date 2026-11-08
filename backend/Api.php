@@ -149,6 +149,9 @@ final class Api
                     ));
                 }
                 $body = Http::body();
+                if ($method === 'POST' && $param === 'batch') {
+                    Http::json(Content::batchPosts($body));
+                }
                 if ($method === 'POST') {
                     $id = Content::savePost($body, null);
                     Http::json(['id' => $id], 201);
