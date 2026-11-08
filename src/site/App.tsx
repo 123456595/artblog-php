@@ -38,6 +38,7 @@ export default function App() {
           跳到正文 / SKIP TO CONTENT
         </a>
         <ScrollToTop />
+        <div className="page-fade" aria-hidden="true" />
         <Routes>
           <Route path="/" element={<Home onSearch={openSearch} />} />
           <Route path="/writing" element={<WritingPage onSearch={openSearch} />} />

@@ -1634,13 +1634,13 @@
   display: inline-block;
 }
 
-/* ---------- 蓝图刻度尺（右侧滚动仪表） ---------- */
+/* ---------- 蓝图刻度尺 · 游标卡尺（右侧滚动仪表） ---------- */
 .rail {
   position: fixed;
-  right: 14px;
+  right: 12px;
   top: calc(var(--nav-h) + 26px);
-  bottom: 54px;
-  width: 54px;
+  bottom: 56px;
+  width: 96px;
   z-index: 26;
   display: flex;
   flex-direction: column;
@@ -1658,12 +1658,12 @@
   letter-spacing: 0.1em;
 }
 .rail-pct b {
-  font-size: 15px;
+  font-size: 11px;
   font-weight: 500;
   line-height: 1;
 }
 .rail-pct span {
-  font-size: 9px;
+  font-size: 8px;
   color: var(--muted-2);
 }
 .rail-track {
@@ -1677,63 +1677,171 @@
   bottom: 0;
   right: 0;
   width: 1px;
-  background: var(--line);
+  background: var(--muted-2);
+  opacity: 0.45;
 }
+/* 次刻度：每 2.5% 一格，正好 40 格，与 25% 主刻度对齐 */
 .rail-ticks {
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
-  width: 10px;
+  width: 7px;
   background-image: repeating-linear-gradient(
     to bottom,
     var(--muted-2) 0,
     var(--muted-2) 1px,
     transparent 1px,
-    transparent 12px
+    transparent 2.5%
   );
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 6%, #000 94%, transparent);
-  opacity: 0.55;
+  opacity: 0.5;
 }
-.rail-fill {
+/* 主刻度：0 / 25 / 50 / 75 / 100，数字在刻度左侧 */
+.rail-major {
   position: absolute;
-  top: 0;
   right: 0;
-  width: 1px;
-  height: 0;
-  background: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transform: translateY(-50%);
+  white-space: nowrap;
 }
-.rail-marker {
+.rail-major b {
+  font-size: 7.5px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: var(--muted-2);
+}
+.rail-major i {
+  display: block;
+  width: 14px;
+  height: 1px;
+  background: var(--ink);
+  opacity: 0.35;
+}
+/* 游标：空心方框 + 向内容侧伸出的测量臂 */
+.rail-cursor {
   position: absolute;
-  right: -2px;
+  right: 0;
   top: 0;
-  width: 5px;
-  height: 5px;
+  width: 0;
+  height: 0;
+}
+.rc-box {
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid var(--accent);
+  background: var(--paper);
+}
+.rc-arm {
+  position: absolute;
+  right: 3px;
+  top: 0;
+  width: 26px;
+  height: 1px;
   background: var(--accent);
-  transform: translateY(-50%) rotate(45deg);
+  opacity: 0.85;
+}
+/* 章节标签：六个常驻，可点击跳转 */
+.rail-secs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 .rail-sec {
+  position: absolute;
+  right: 40px;
   display: inline-flex;
   align-items: baseline;
-  gap: 4px;
-  font-size: 9px;
-  letter-spacing: 0.16em;
-  color: var(--muted-2);
-  writing-mode: vertical-rl;
+  gap: 5px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 7.5px;
+  letter-spacing: 0.12em;
+  line-height: 1;
   text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted-2);
+  opacity: 0.45;
+  cursor: pointer;
+  pointer-events: auto;
+  transform: translateY(-50%);
+  transition: opacity 0.18s var(--ease), color 0.18s var(--ease);
 }
 .rail-sec b {
-  color: var(--ink);
   font-weight: 500;
+  color: inherit;
 }
-.rail-sec i {
-  font-style: normal;
+.rail-sec.is-active {
+  opacity: 1;
+  color: var(--ink);
+}
+.rail-sec.is-active b {
+  color: var(--accent);
+}
+.rail-sec:hover,
+.rail-sec:focus-visible {
+  opacity: 1;
+  color: var(--ink);
+  outline: none;
+}
+.rail-sec:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* 窄桌面：章节标签改为竖排，收进右侧留白，避免压到正文 */
+@media (max-width: 1499px) {
+  .rail {
+    width: 44px;
+  }
+  .rail-major b {
+    display: none;
+  }
+  .rail-sec {
+    right: 16px;
+    display: inline-block;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.08em;
+    line-height: 1.35;
+    padding: 0;
+    gap: 0;
+  }
 }
 
 @media (max-width: 900px) {
   .rail {
     display: none;
+  }
+}
+
+/* ---------- 视口底部渐隐（纸色收边） ---------- */
+.page-fade {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 84px;
+  z-index: 25;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    var(--paper) 0%,
+    rgba(251, 251, 248, 0.72) 34%,
+    rgba(251, 251, 248, 0) 100%
+  );
+}
+
+@media (max-width: 900px) {
+  .page-fade {
+    height: 56px;
   }
 }
 

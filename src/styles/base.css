@@ -277,6 +277,7 @@ button {
 .sec {
   border-top: 1px solid var(--line);
   padding: 0 0 var(--section-gap);
+  scroll-margin-top: calc(var(--nav-h) + 12px);
 }
 
 .sec-head {
